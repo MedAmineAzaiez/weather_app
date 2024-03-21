@@ -2,6 +2,7 @@ class CitiesListHelper {
   static const List<String> cities = <String>[
     'Tunis',
     'Sousse',
+    'Sahline',
     'Madrid',
     'London',
     'Paris',

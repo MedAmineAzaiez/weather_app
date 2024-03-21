@@ -9,6 +9,7 @@ import 'package:weather_app/helpers/unit_preferences.dart';
 import 'package:weather_app/models/weather_data_model.dart';
 import 'package:weather_app/repository/weather_repo.dart';
 import 'package:weather_icons/weather_icons.dart';
+import 'package:weather_app/helpers/extensions.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
@@ -104,7 +105,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      _buildTemperatureUnitCheckboxWidget(),
+                      _buildTemperatureUnitToggleWidget(),
                       _buildCityNameWidget(_selectedCity, size),
                       _buildCUrrentTempWidget(weather.mainDetails!.temp!.round(), size),
                       _buildDividerWidget(size),
@@ -147,7 +148,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
               },
               onSelected: (String selection) {
                 setState(() {
-                  _selectedCity = selection;
+                  _selectedCity = selection.toCapitalized();
                 });
                 _fetchWeather(_selectedCity);
               },
@@ -175,7 +176,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         ),
       );
 
-  Widget _buildTemperatureUnitCheckboxWidget() => Padding(
+  Widget _buildTemperatureUnitToggleWidget() => Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -214,28 +215,25 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   borderRadius: const BorderRadius.all(
                     Radius.circular(10),
                   ),
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.blueGrey.withOpacity(0.09),
                 ),
                 child: Column(
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          top: size.height * 0.02,
-                          left: size.width * 0.03,
-                        ),
-                        child: Text(
-                          '7-day forecast',
-                          style: TextStyle(
-                            color: AppColors.textColor,
-                            fontSize: size.height * 0.025,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    Padding(
+                      padding: EdgeInsets.only(
+                        top: size.height * 0.02,
+                        left: size.width * 0.03,
+                      ),
+                      child: Text(
+                        '7-day forecast',
+                        style: TextStyle(
+                          color: AppColors.textColor,
+                          fontSize: size.height * 0.025,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const Divider(color: AppColors.textColor),
+                    const Divider(color: AppColors.primaryColor),
                     ListView.builder(
                       itemCount: weekWeatherForecast.length,
                       shrinkWrap: true,
@@ -298,7 +296,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       ),
                     ),
                     SizedBox(
-                      height: size.height * 0.3,
+                      height: size.height * 0.36,
                       child: ListView.builder(
                         itemCount: todayWeatherForecast.length,
                         shrinkWrap: true,
@@ -309,7 +307,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(weather.dt! * 1000)),
                             weather.mainDetails!.temp!.round(),
                             weather.wind!.speed!.round(),
-                            (weather.pop! * 100).round(),
+                            weather.mainDetails!.humidity!.round(),
+                            weather.mainDetails!.pressure!.round(),
                             _buildWeatherIcon(weather.weather![0].id!),
                             size,
                           );
@@ -416,7 +415,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
     String time,
     int temp,
     int wind,
-    int rainChance,
+    int humidity,
+    int pressure,
     IconData weatherIcon,
     size,
   ) =>
@@ -431,66 +431,77 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 fontSize: size.height * 0.02,
               ),
             ),
-            Row(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: size.height * 0.005,
-                  ),
-                  child: FaIcon(
-                    weatherIcon,
-                    color: AppColors.primaryColor,
-                    size: size.height * 0.03,
-                  ),
-                ),
-              ],
+            Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: size.height * 0.005,
+              ),
+              child: FaIcon(
+                weatherIcon,
+                color: AppColors.primaryColor,
+                size: size.height * 0.03,
+              ),
             ),
             Text(
               '$temp˚${SharedPreferencesHelper.getTemperatureUnit(_prefs)}',
               style: TextStyle(
-                color: AppColors.textColor,
+                color: temp <= 0
+                    ? Colors.blue
+                    : temp > 0 && temp <= 15
+                        ? Colors.indigo
+                        : temp > 15 && temp < 30
+                            ? Colors.deepPurple
+                            : Colors.pink,
                 fontSize: size.height * 0.025,
               ),
             ),
-            Row(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: size.height * 0.01,
-                  ),
-                  child: FaIcon(
-                    FontAwesomeIcons.wind,
-                    color: Colors.grey,
-                    size: size.height * 0.03,
-                  ),
-                ),
-              ],
+            Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: size.height * 0.01,
+              ),
+              child: FaIcon(
+                FontAwesomeIcons.wind,
+                color: AppColors.primaryColor,
+                size: size.height * 0.03,
+              ),
             ),
             Text(
               '$wind km/h',
               style: TextStyle(
-                color: Colors.grey,
+                color: AppColors.textColor,
                 fontSize: size.height * 0.02,
               ),
             ),
-            Row(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: size.height * 0.01,
-                  ),
-                  child: FaIcon(
-                    FontAwesomeIcons.umbrella,
-                    color: Colors.blue,
-                    size: size.height * 0.03,
-                  ),
-                ),
-              ],
+            Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: size.height * 0.01,
+              ),
+              child: FaIcon(
+                FontAwesomeIcons.droplet,
+                color: AppColors.primaryColor,
+                size: size.height * 0.03,
+              ),
             ),
             Text(
-              '$rainChance %',
+              '$humidity %',
               style: TextStyle(
-                color: Colors.blue,
+                color: AppColors.textColor,
+                fontSize: size.height * 0.02,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: size.height * 0.01,
+              ),
+              child: FaIcon(
+                FontAwesomeIcons.gaugeHigh,
+                color: AppColors.primaryColor,
+                size: size.height * 0.03,
+              ),
+            ),
+            Text(
+              '$pressure hPa',
+              style: TextStyle(
+                color: AppColors.textColor,
                 fontSize: size.height * 0.02,
               ),
             ),
@@ -525,7 +536,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   ),
                   child: FaIcon(
                     weatherIcon,
-                    color: AppColors.textColor,
+                    color: AppColors.primaryColor,
                     size: size.height * 0.03,
                   ),
                 ),
@@ -537,7 +548,13 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     child: Text(
                       '$minTemp˚${SharedPreferencesHelper.getTemperatureUnit(_prefs)}',
                       style: TextStyle(
-                        color: AppColors.textColor,
+                        color: minTemp <= 0
+                            ? Colors.blue
+                            : minTemp > 0 && minTemp <= 15
+                                ? Colors.indigo
+                                : minTemp > 15 && minTemp < 30
+                                    ? Colors.deepPurple
+                                    : Colors.pink,
                         fontSize: size.height * 0.025,
                       ),
                     ),
@@ -552,7 +569,13 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     child: Text(
                       '$maxTemp˚${SharedPreferencesHelper.getTemperatureUnit(_prefs)}',
                       style: TextStyle(
-                        color: AppColors.textColor,
+                        color: maxTemp <= 0
+                            ? Colors.blue
+                            : maxTemp > 0 && maxTemp <= 15
+                                ? Colors.indigo
+                                : maxTemp > 15 && maxTemp < 30
+                                    ? Colors.deepPurple
+                                    : Colors.pink,
                         fontSize: size.height * 0.025,
                       ),
                     ),
