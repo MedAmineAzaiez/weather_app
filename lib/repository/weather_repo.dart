@@ -4,9 +4,10 @@ import 'package:weather_app/config/app_config.dart';
 import 'package:weather_app/models/weather_data_model.dart';
 
 class WeatherRepository {
-  Future<WeatherData> getWeather(String city, String unit) async {
-    final response =
-        await http.get(Uri.parse('${AppConfig.baseUrl}/weather?q=$city&appid=${AppConfig.apiKey}&units=$unit'));
+  Future<WeatherData> getWeather(String city, String unit, DateTime date) async {
+    final unixTime = date.millisecondsSinceEpoch ~/ 1000;
+    final response = await http
+        .get(Uri.parse('${AppConfig.baseUrl}/weather?q=$city&dt=$unixTime&appid=${AppConfig.apiKey}&units=$unit'));
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       return WeatherData.fromJson(json);

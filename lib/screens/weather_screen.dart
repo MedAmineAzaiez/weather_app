@@ -33,9 +33,13 @@ class _WeatherScreenState extends State<WeatherScreen> {
     return _prefs;
   }
 
-  Future<void> _fetchTodaysWeather(String city) async {
+  Future<void> _fetchTodaysWeather(String city, DateTime dateTime) async {
     setState(() {
-      _weather = WeatherRepository().getWeather(city, SharedPreferencesHelper.getApiUnit(_prefs));
+      _weather = WeatherRepository().getWeather(
+        city,
+        SharedPreferencesHelper.getApiUnit(_prefs),
+        dateTime,
+      );
     });
   }
 
@@ -65,8 +69,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
     });
   }
 
-  _fetchWeather(String city) async {
-    await _fetchTodaysWeather(_selectedCity);
+  _fetchWeather(String city, DateTime dateTime) async {
+    await _fetchTodaysWeather(_selectedCity, dateTime);
     await _fetchTodayWeatherForecast(_selectedCity);
     await _fetchWeekWeatherForecast(_selectedCity);
   }
@@ -75,7 +79,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   void initState() {
     super.initState();
     _getSharedPrefs().then((_) {
-      _fetchWeather(_selectedCity);
+      _fetchWeather(_selectedCity, DateTime.now());
     });
   }
 
@@ -90,7 +94,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
-            _fetchWeather(_selectedCity);
+            _fetchWeather(_selectedCity, DateTime.now());
           },
           child: FutureBuilder<WeatherData>(
             future: _weather,
@@ -106,6 +110,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       _buildTemperatureUnitToggleWidget(),
+                      _buildDayNameWidget(weather.dt!, size),
                       _buildCityNameWidget(_selectedCity, size),
                       _buildCUrrentTempWidget(weather.mainDetails!.temp!.round(), size),
                       _buildDividerWidget(size),
@@ -133,6 +138,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
+  Widget _buildDayNameWidget(int dateTime, Size size) => Padding(
+        padding: EdgeInsets.only(
+          top: size.height * 0.01,
+        ),
+        child: Text(
+          DateFormat('EEEE, MMMM d, y').format(DateTime.fromMillisecondsSinceEpoch(dateTime * 1000)),
+          style: TextStyle(
+            color: AppColors.textColor,
+            fontSize: size.height * 0.03,
+          ),
+        ),
+      );
+
   Widget _buildSearchWeatherPerCityNameFieldWidget() => Padding(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
         child: Column(
@@ -150,7 +168,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 setState(() {
                   _selectedCity = selection.toCapitalized();
                 });
-                _fetchWeather(_selectedCity);
+                _fetchWeather(_selectedCity, DateTime.now());
               },
               fieldViewBuilder: (
                 BuildContext context,
@@ -189,7 +207,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
               labels: const ['C', 'F'],
               onToggle: (index) async {
                 await SharedPreferencesHelper.setTemperatureUnit(_prefs, index == 0 ? 'C' : 'F');
-                await _fetchWeather(_selectedCity);
+                await _fetchWeather(_selectedCity, DateTime.now());
               },
             ),
           ],
@@ -240,7 +258,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       itemBuilder: (context, index) {
                         final weather = weekWeatherForecast[index];
                         return buildSevenDayForecast(
-                          DateFormat.E().format(DateTime.fromMillisecondsSinceEpoch(weather.dt! * 1000)),
+                          weather.dt!,
                           weather.mainDetails!.tempMin!.round(),
                           weather.mainDetails!.tempMax!.round(),
                           _buildWeatherIcon(weather.weather![0].id!),
@@ -509,7 +527,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         ),
       );
 
-  Widget buildSevenDayForecast(String time, int minTemp, int maxTemp, IconData weatherIcon, size) => Padding(
+  Widget buildSevenDayForecast(int dateTime, int minTemp, int maxTemp, IconData weatherIcon, size) => Padding(
         padding: EdgeInsets.all(
           size.height * 0.005,
         ),
@@ -523,7 +541,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     horizontal: size.width * 0.02,
                   ),
                   child: Text(
-                    time,
+                    DateFormat.E().format(DateTime.fromMillisecondsSinceEpoch(dateTime * 1000)),
                     style: TextStyle(
                       color: AppColors.textColor,
                       fontSize: size.height * 0.025,
