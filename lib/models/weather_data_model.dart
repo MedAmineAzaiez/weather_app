@@ -10,7 +10,7 @@ class WeatherData {
   List<Weather>? weather;
   String? base;
   MainWeatherDetails? mainDetails;
-  int? visibility;
+  double? visibility;
   Wind? wind;
   Clouds? clouds;
   int? dt;
@@ -18,22 +18,25 @@ class WeatherData {
   int? timezone;
   int? id;
   String? name;
-  int? cod;
+  double? cod;
+  double? pop;
 
-  WeatherData(
-      {this.coordination,
-      this.weather,
-      this.base,
-      this.mainDetails,
-      this.visibility,
-      this.wind,
-      this.clouds,
-      this.dt,
-      this.systemDetails,
-      this.timezone,
-      this.id,
-      this.name,
-      this.cod});
+  WeatherData({
+    this.coordination,
+    this.weather,
+    this.base,
+    this.mainDetails,
+    this.visibility,
+    this.wind,
+    this.clouds,
+    this.dt,
+    this.systemDetails,
+    this.timezone,
+    this.id,
+    this.name,
+    this.cod,
+    this.pop,
+  });
 
   WeatherData.fromJson(Map<String, dynamic> json) {
     coordination = json['coord'] != null ? Coordination.fromJson(json['coord']) : null;
@@ -45,7 +48,7 @@ class WeatherData {
     }
     base = json['base'];
     mainDetails = json['main'] != null ? MainWeatherDetails.fromJson(json['main']) : null;
-    visibility = json['visibility'];
+    visibility = json['visibility'] != null ? json['visibility'].toDouble() : 0;
     wind = json['wind'] != null ? Wind.fromJson(json['wind']) : null;
     clouds = json['clouds'] != null ? Clouds.fromJson(json['clouds']) : null;
     dt = json['dt'];
@@ -53,7 +56,8 @@ class WeatherData {
     timezone = json['timezone'];
     id = json['id'];
     name = json['name'];
-    cod = json['cod'];
+    cod = json['cod'] != null ? json['cod'].toDouble() : 0;
+    pop = json['pop'] != null ? json['pop'].toDouble() : 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -83,6 +87,7 @@ class WeatherData {
     data['id'] = id;
     data['name'] = name;
     data['cod'] = cod;
+    data['pop'] = pop;
     return data;
   }
 }

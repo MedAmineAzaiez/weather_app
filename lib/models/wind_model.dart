@@ -1,14 +1,14 @@
 class Wind {
   double? speed;
-  int? deg;
+  double? deg;
   double? gust;
 
   Wind({this.speed, this.deg, this.gust});
 
   Wind.fromJson(Map<String, dynamic> json) {
-    speed = json['speed'];
-    deg = json['deg'];
-    gust = json['gust'];
+    speed = json['speed'] != null ? json['speed'].toDouble() : 0;
+    deg = json['deg'] != null ? json['deg'].toDouble() : 0;
+    gust = json['gust'] != null ? json['gust'].toDouble() : 0;
   }
 
   Map<String, dynamic> toJson() {

@@ -4,9 +4,9 @@ import 'package:weather_app/config/app_config.dart';
 import 'package:weather_app/models/weather_data_model.dart';
 
 class WeatherRepository {
-  Future<WeatherData> getWeather(String city) async {
+  Future<WeatherData> getWeather(String city, String unit) async {
     final response =
-        await http.get(Uri.parse('${AppConfig.baseUrl}/weather?q=$city&appid=${AppConfig.apiKey}&units=metric'));
+        await http.get(Uri.parse('${AppConfig.baseUrl}/weather?q=$city&appid=${AppConfig.apiKey}&units=$unit'));
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       return WeatherData.fromJson(json);
@@ -15,9 +15,14 @@ class WeatherRepository {
     }
   }
 
-  Future<List<WeatherData>> getForecastForSelectedPeriod(String city, DateTime startDay, DateTime endDay) async {
+  Future<List<WeatherData>> getForecastForSelectedPeriod(
+    String city,
+    DateTime startDay,
+    DateTime endDay,
+    String unit,
+  ) async {
     final response =
-        await http.get(Uri.parse('${AppConfig.baseUrl}/forecast?q=$city&appid=${AppConfig.apiKey}&units=metric'));
+        await http.get(Uri.parse('${AppConfig.baseUrl}/forecast?q=$city&appid=${AppConfig.apiKey}&units=$unit'));
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       final List<dynamic> list = json['list'];
@@ -33,14 +38,19 @@ class WeatherRepository {
     }
   }
 
-  Future<List<WeatherData>> getFiltredForecastForSelectedPeriod(String city, DateTime startDay, DateTime endDay) async {
+  Future<List<WeatherData>> getFilteredForecastForSelectedPeriod(
+    String city,
+    DateTime startDay,
+    DateTime endDay,
+    String unit,
+  ) async {
     final response =
-        await http.get(Uri.parse('${AppConfig.baseUrl}/forecast?q=$city&appid=${AppConfig.apiKey}&units=metric'));
+        await http.get(Uri.parse('${AppConfig.baseUrl}/forecast?q=$city&appid=${AppConfig.apiKey}&units=$unit'));
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       final List<dynamic> list = json['list'];
 
-      final Set<int> uniqueDays = {}; // Set to store unique day values
+      final Map<int, WeatherData> forecastMap = {}; // Map to store unique day values with corresponding WeatherData
       final List<WeatherData> forecastForPeriod = [];
 
       for (var item in list) {
@@ -48,11 +58,22 @@ class WeatherRepository {
         final DateTime dt = DateTime.fromMillisecondsSinceEpoch(weather.dt! * 1000);
         final int dayValue = DateTime(dt.year, dt.month, dt.day).millisecondsSinceEpoch;
 
-        if (dt.isAfter(startDay) && dt.isBefore(endDay) && !uniqueDays.contains(dayValue)) {
-          forecastForPeriod.add(weather);
-          uniqueDays.add(dayValue);
+        if (dt.isAfter(startDay) && dt.isBefore(endDay)) {
+          if (!forecastMap.containsKey(dayValue)) {
+            forecastMap[dayValue] = weather;
+          } else {
+            // Update minTemp and maxTemp if necessary
+            if (weather.mainDetails!.tempMin! < forecastMap[dayValue]!.mainDetails!.tempMin!) {
+              forecastMap[dayValue]!.mainDetails!.tempMin = weather.mainDetails!.tempMin;
+            }
+            if (weather.mainDetails!.tempMax! > forecastMap[dayValue]!.mainDetails!.tempMax!) {
+              forecastMap[dayValue]!.mainDetails!.tempMax = weather.mainDetails!.tempMax;
+            }
+          }
         }
       }
+
+      forecastForPeriod.addAll(forecastMap.values);
 
       return forecastForPeriod;
     } else {

@@ -2,8 +2,8 @@ class SystemDetails {
   int? type;
   int? id;
   String? country;
-  int? sunrise;
-  int? sunset;
+  double? sunrise;
+  double? sunset;
 
   SystemDetails({this.type, this.id, this.country, this.sunrise, this.sunset});
 
@@ -11,8 +11,8 @@ class SystemDetails {
     type = json['type'];
     id = json['id'];
     country = json['country'];
-    sunrise = json['sunrise'];
-    sunset = json['sunset'];
+    sunrise = json['sunrise'] != null ? json['sunrise'].toDouble() : 0;
+    sunset = json['sunset'] != null ? json['sunset'].toDouble() : 0;
   }
 
   Map<String, dynamic> toJson() {

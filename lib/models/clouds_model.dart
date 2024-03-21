@@ -4,7 +4,7 @@ class Clouds {
   Clouds({this.all});
 
   Clouds.fromJson(Map<String, dynamic> json) {
-    all = json['all']?.toDouble();
+    all = json['all'] != null ? json['all'].toDouble() : 0;
   }
 
   Map<String, dynamic> toJson() {
