@@ -1,17 +1,40 @@
-# weather_app
+# Weather App
 
-A new Flutter project.
+This Flutter application allows users to view weather information for different cities. It uses the OpenWeatherMap API to fetch weather data.
 
-## Getting Started
+## Table of Contents
 
-This project is a starting point for a Flutter application.
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
 
-A few resources to get you started if this is your first Flutter project:
+## Installation
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Clone the repository:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# weather_app
+   ```sh
+   git clone https://github.com/your-username/weather-app.git
+2. Navigate to the project directory and install dependencies:
+
+   ```sh
+   cd weather-app
+   flutter pub get
+3. Run the project:
+
+   ```sh
+   flutter run
+
+## Usage
+To use the app, enter the name of a city in the search field and select it from the autocomplete suggestions. The app will then display the current weather information for that city.
+
+## Contributing
+If you'd like to contribute to this project, please follow these guidelines:
+
+1.  Fork the repository
+2.  Create a new branch (git checkout -b feature)
+3.  Make your changes
+4.  Commit your changes (git commit -am 'Add new feature')
+5.  Push to the branch (git push origin feature)
+6.  Create a new Pull Request
+
+ 
